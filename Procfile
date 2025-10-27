@@ -1,1 +1,1 @@
-web: gunicorn ecet_buddy.newfile:app
+web:gunicorn newfile:app
