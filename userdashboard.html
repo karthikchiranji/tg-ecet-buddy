@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>User Dashboard - TG ECET Buddy</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body, html { height: 100%; }
+    .avatar-wrapper { width: 96px; height: 96px; border-radius: 9999px; overflow: hidden; position: relative; }
+    .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .camera-btn { position: absolute; right: -6px; bottom: -6px; background: white; border-radius: 999px; padding: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
+    .progress-bar-bg { background: rgba(0,0,0,0.06); border-radius: 999px; height: 12px; width: 100%; }
+    .progress-bar-fill { height: 12px; border-radius: 999px; width: 0%; background: linear-gradient(90deg,#8b5cf6,#7c3aed); transition: width 1200ms ease; }
+    .hidden-section { display: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white p-6 shadow flex flex-col justify-between">
+      <div>
+        <div class="flex items-center mb-8">
+          <span class="material-icons text-purple-600 text-3xl mr-2">school</span>
+          <h1 class="text-lg font-bold">TG ECET BUDDY</h1>
+        </div>
+        <nav>
+          <ul class="space-y-2">
+            <li><a href="{{ url_for('home') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">home</span>Home</a></li>
+            <li><a href="{{ url_for('about') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">info</span>About ECET</a></li>
+            <li><a href="{{ url_for('after_ecet') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">school</span>After ECET</a></li>
+            <li><a href="{{ url_for('strategy') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">rocket_launch</span>Strategy</a></li>
+            <li><a href="{{ url_for('notes') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">bookmark</span>Notes</a></li>
+            <li><a href="{{ url_for('alerts') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">notifications</span>Alerts</a></li>
+            <li><a href="{{ url_for('goal_tracker') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">check_circle</span>Goal Tracker</a></li>
+            <li><a href="{{ url_for('chatbox') }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-100"><span class="material-icons">chat</span>Doubt Chat</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div>
+        <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 p-3 rounded mt-6 text-purple-700 bg-purple-50 hover:bg-purple-100">
+          <span class="material-icons">dashboard</span>Dashboard
+        </a>
+        <button onclick="confirmLogout()" class="flex items-center gap-3 p-3 rounded mt-2 text-red-600 hover:bg-red-50 w-full text-left">
+          <span class="material-icons">logout</span>Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      <header class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-2xl font-bold">Welcome back, {{ user.name }}!</h2>
+          <p class="text-sm text-gray-500">Your dashboard — quick access to progress & profile</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="p-2 rounded-full hover:bg-gray-100"><span class="material-icons">search</span></button>
+          <button class="p-2 rounded-full hover:bg-gray-100"><span class="material-icons">notifications</span></button>
+          <button id="settingsToggle" class="p-2 rounded-full hover:bg-gray-100"><span class="material-icons">settings</span></button>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <div id="dashboardSection">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Profile -->
+          <div class="bg-white p-6 rounded shadow flex flex-col items-center">
+            <div class="avatar-wrapper mb-4">
+              {% if user.avatar %}
+                <img src="{{ url_for('static', filename=user.avatar) }}" alt="avatar" />
+              {% else %}
+                <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
+                  <span class="material-icons text-5xl">account_circle</span>
+                </div>
+              {% endif %}
+              <form action="{{ url_for('upload_avatar') }}" method="post" enctype="multipart/form-data" class="absolute">
+                <label class="camera-btn">
+                  <input type="file" name="avatar" accept="image/*" class="hidden" onchange="this.form.submit()" />
+                  <span class="material-icons text-sm">camera_alt</span>
+                </label>
+              </form>
+            </div>
+            <h3 class="text-lg font-semibold">{{ user.name }}</h3>
+            <p class="text-sm text-gray-500 mb-4">{{ user.email }}</p>
+            <div class="w-full">
+              <label class="text-sm font-medium text-gray-600">Overall Progress</label>
+              <div class="mt-2 progress-bar-bg">
+                <div id="progressFill" class="progress-bar-fill" style="width:0%"></div>
+              </div>
+              <div class="text-right text-sm text-gray-500 mt-1" id="progressLabel">0%</div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="bg-white p-6 rounded shadow">
+            <h4 class="font-semibold mb-3">Study Stats</h4>
+            <p class="text-sm text-gray-500 mb-4">Weekly summary of your activity.</p>
+            <div>
+              <div class="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Study Hours</span><span>12h</span>
+              </div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:40%"></div></div>
+            </div>
+            <div class="mt-4">
+              <div class="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Mock Tests</span><span>3</span>
+              </div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:30%"></div></div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="bg-white p-6 rounded shadow space-y-3">
+            <h4 class="font-semibold">Quick Actions</h4>
+            <a class="block p-3 border rounded hover:bg-purple-50" href="{{ url_for('goal_tracker') }}">
+              <span class="material-icons align-middle mr-2">check_circle</span> Create Timetable
+            </a>
+            <a class="block p-3 border rounded hover:bg-purple-50" href="#">
+              <span class="material-icons align-middle mr-2">menu_book</span> Open Subjects
+            </a>
+            <a class="block p-3 border rounded hover:bg-purple-50" href="#">
+              <span class="material-icons align-middle mr-2">assignment</span> Start Mock Test
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Settings Section -->
+      <div id="settingsSection" class="hidden-section mt-8">
+        <div class="bg-white p-6 rounded shadow">
+          <h4 class="text-lg font-semibold mb-4">Profile Settings</h4>
+          <form method="POST" action="{{ url_for('dashboard') }}">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Full name</label>
+                <input name="name" value="{{ user.name }}" class="w-full p-3 border rounded" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Email</label>
+                <input name="email" value="{{ user.email }}" class="w-full p-3 border rounded" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">(Change password)</label>
+                <input name="current_password" placeholder="Current password" type="password" class="w-full p-3 border rounded mb-2" />
+                <input name="new_password" placeholder="New password" type="password" class="w-full p-3 border rounded mb-2" />
+                <input name="confirm_new_password" placeholder="Confirm new password" type="password" class="w-full p-3 border rounded" />
+              </div>
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="bg-purple-600 text-white px-5 py-2 rounded">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Animate progress bar
+    const target = {{ user.progress | int }};
+    const fill = document.getElementById('progressFill');
+    const label = document.getElementById('progressLabel');
+    let current = 0;
+    const duration = 1200, fps = 60;
+    const steps = Math.floor((duration / 1000) * fps);
+    const increment = target / steps;
+
+    const animate = () => {
+      let step = 0;
+      const id = setInterval(() => {
+        current += increment;
+        step++;
+        if (step >= steps) clearInterval(id);
+        const percent = Math.round(current);
+        fill.style.width = percent + '%';
+        label.textContent = percent + '%';
+      }, duration / steps);
+    };
+    window.addEventListener('load', () => setTimeout(animate, 400));
+
+    // Toggle settings section
+    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsSection = document.getElementById('settingsSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+
+    settingsToggle.addEventListener('click', () => {
+      const isHidden = settingsSection.classList.contains('hidden-section');
+      settingsSection.classList.toggle('hidden-section', !isHidden);
+      dashboardSection.style.display = isHidden ? 'none' : 'block';
+    });
+
+    // Logout confirmation
+    function confirmLogout() {
+      if (confirm("Are you sure you want to log out?")) {
+        window.location.href = "{{ url_for('register') }}";
+      }
+    }
+  </script>
+</body>
+</html>

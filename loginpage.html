@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TG ECET Buddy - Login</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com/"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Public+Sans:wght@400;500;700;900"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+
+  <body class="bg-white font-['Public_Sans','Noto_Sans',sans-serif]">
+    <div class="relative flex min-h-screen flex-col overflow-x-hidden">
+      <!-- Header -->
+      <header class="flex items-center justify-between border-b border-gray-200 px-10 py-3">
+        <div class="flex items-center gap-3 text-gray-900">
+          <svg
+            viewBox="0 0 48 48"
+            fill="currentColor"
+            class="size-6 text-[#9588d7]"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M24 45.8C19.7 45.8 15.5 44.5 11.9 42.1C8.3 39.7 5.5 36.3 3.9 32.3C2.2 28.4 1.8 24 2.6 19.7C3.5 15.5 5.5 11.6 8.6 8.6C11.6 5.5 15.5 3.5 19.7 2.6C24 1.8 28.4 2.2 32.3 3.9C36.3 5.5 39.7 8.3 42.1 11.9C44.5 15.5 45.8 19.7 45.8 24H24V45.8Z"
+            ></path>
+          </svg>
+          <h2 class="text-lg font-bold">TG ECET Buddy</h2>
+        </div>
+        <nav class="flex items-center gap-9 text-sm font-medium">
+          <a href="{{ url_for('home') }}" class="hover:text-[#9588d7]">Home</a>
+          <a href="#" class="hover:text-[#9588d7]">Courses</a>
+          <a href="{{ url_for('about') }}" class="hover:text-[#9588d7]">About Us</a>
+          <a href="#" class="hover:text-[#9588d7]">Contact</a>
+        </nav>
+        <a
+          href="{{ url_for('register') }}"
+          class="rounded-full bg-[#9588d7] px-4 py-2 font-bold text-sm text-[#131216]"
+          >Sign Up</a
+        >
+      </header>
+
+      <!-- Login Form -->
+      <div class="flex flex-1 justify-center py-10 px-4">
+        <div class="w-full max-w-md rounded-2xl p-8 shadow-sm">
+          <h2 class="text-center text-[28px] font-bold mb-8">
+            Welcome Back
+          </h2>
+
+
+{% if success %}
+  <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-5 text-center">
+    {{ success }}
+  </div>
+{% endif %}
+          {% if error %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5 text-center">
+              {{ error }}
+            </div>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('login') }}">
+            <!-- Email -->
+            <div class="mb-5">
+              <label class="block text-base font-medium mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                autocomplete="email"
+                required
+                class="w-full rounded-xl border border-gray-300 p-4 focus:border-[#9588d7] focus:ring-[#9588d7] focus:outline-none"
+              />
+            </div>
+
+            <!-- Password -->
+            <div class="mb-5">
+              <label class="block text-base font-medium mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+                class="w-full rounded-xl border border-gray-300 p-4 focus:border-[#9588d7] focus:ring-[#9588d7] focus:outline-none"
+              />
+            </div>
+
+            <!-- Remember + Forgot -->
+            <div class="flex items-center justify-between mb-5">
+              <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-[#9588d7] focus:ring-[#9588d7]"
+                />
+                Remember me
+              </label>
+              <a href="#" class="text-sm text-[#6d6a81] underline"
+                >Forgot Password?</a
+              >
+            </div>
+
+            <!-- Login Button -->
+            <button
+              type="submit"
+              class="w-full rounded-full bg-[#9588d7] py-3 font-bold text-[#131216] text-base"
+            >
+              Login
+            </button>
+          </form>
+
+          <!-- Sign Up Redirect -->
+          <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">
+              Don’t have an account?
+              <a href="{{ url_for('register') }}" class="text-[#9588d7] font-semibold underline">Sign up</a>
+            </p>
+          </div>
+
+          <p class="text-sm text-gray-500 text-center mt-3">
+            By continuing, you agree to our
+            <span class="underline">Terms of Service</span> and
+            <span class="underline">Privacy Policy</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
